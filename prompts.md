@@ -9,3 +9,4 @@
 - Confirmed the MVP choices and requested the planned specification, reference cases, and calculation-first implementation. Updated the specification and built the single-file calculator; the opening example was verified in the browser against the documented results. Worked: yes.
 - Asked to show deflection as well. Verified that the app displays maximum deflection, its pass/fail check, and a deflection diagram. Worked: yes.
 - Asked to auto-commit the pending changes. Committed the tracked app cleanup and prompt log update. Worked: yes.
+- Asked to make the GitHub repository public. After confirming the existing commit email would be exposed, changed the repository visibility to public and verified the setting. Worked: yes.

@@ -10,3 +10,4 @@
 - Asked to show deflection as well. Verified that the app displays maximum deflection, its pass/fail check, and a deflection diagram. Worked: yes.
 - Asked to auto-commit the pending changes. Committed the tracked app cleanup and prompt log update. Worked: yes.
 - Asked to make the GitHub repository public. After confirming the existing commit email would be exposed, changed the repository visibility to public and verified the setting. Worked: yes.
+- Asked to fix the broken GitHub Pages 404. Enabled Pages in workflow-build mode and added a main-branch Pages deployment workflow. Worked: pending deployment verification.

@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6f8">
+    <title>Beam Designer</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #17212b;
+        background: #f4f6f8;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+      }
+
+      header {
+        padding: 28px max(24px, calc((100% - 1180px) / 2));
+        color: #fff;
+        background: #173d5c;
+      }
+
+      header h1 {
+        margin: 0 0 6px;
+        font-size: 1.8rem;
+      }
+
+      header p {
+        max-width: 740px;
+        margin: 0;
+        color: #d7e5ef;
+        line-height: 1.5;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+        gap: 20px;
+        width: min(1180px, calc(100% - 32px));
+        margin: 22px auto 36px;
+        align-items: start;
+      }
+
+      .card {
+        border: 1px solid #dce3e9;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 2px 8px #18344a0a;
+      }
+
+      .inputs {
+        padding: 20px;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 1.15rem;
+      }
+
+      h3 {
+        margin: 22px 0 10px;
+        font-size: 1rem;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .field {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .field.full { grid-column: 1 / -1; }
+
+      label, .field-label {
+        color: #334454;
+        font-size: .84rem;
+        font-weight: 600;
+      }
+
+      input, select {
+        width: 100%;
+        min-height: 38px;
+        padding: 8px 9px;
+        border: 1px solid #bdc9d3;
+        border-radius: 6px;
+        color: #17212b;
+        background: #fff;
+        font: inherit;
+        font-size: .92rem;
+      }
+
+      input:focus, select:focus, button:focus-visible {
+        outline: 3px solid #8bc4e6;
+        outline-offset: 1px;
+      }
+
+      .load-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .load-row {
+        display: grid;
+        grid-template-columns: minmax(90px, .9fr) minmax(94px, 1fr) minmax(78px, .8fr) minmax(78px, .8fr) 34px;
+        gap: 6px;
+        align-items: end;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e8edf1;
+      }
+
+      .load-row .field { gap: 4px; }
+      .load-row label { font-size: .72rem; }
+      .load-row input, .load-row select { min-height: 35px; padding: 6px; font-size: .82rem; }
+
+      button {
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid #aebdca;
+        border-radius: 6px;
+        color: #173d5c;
+        background: #fff;
+        font: inherit;
+        font-size: .9rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button:hover { background: #f0f6fa; }
+
+      .remove-load {
+        min-height: 35px;
+        padding: 4px;
+        color: #7d3030;
+      }
+
+      .load-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .primary {
+        width: 100%;
+        margin-top: 18px;
+        border-color: #173d5c;
+        color: #fff;
+        background: #173d5c;
+      }
+
+      .primary:hover { background: #245679; }
+
+      .hint, .example-note {
+        margin: 10px 0 0;
+        color: #526373;
+        font-size: .82rem;
+        line-height: 1.45;
+      }
+
+      .example-note {
+        margin: 0;
+        padding: 11px 13px;
+        border-left: 4px solid #d89c37;
+        border-radius: 4px;
+        background: #fff8e9;
+      }
+
+      .error {
+        margin: 14px 0 0;
+        padding: 10px 12px;
+        border-radius: 6px;
+        color: #842b2b;
+        background: #fff0f0;
+        font-size: .9rem;
+        line-height: 1.4;
+      }
+
+      [hidden] { display: none !important; }
+
+      .results {
+        display: grid;
+        gap: 14px;
+      }
+
+      .summary {
+        padding: 18px;
+      }
+
+      .summary h2 { margin-bottom: 12px; }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #e1e7ec;
+        border-radius: 8px;
+        background: #fbfcfd;
+      }
+
+      .metric-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #526373;
+        font-size: .78rem;
+      }
+
+      .metric-value {
+        display: block;
+        overflow-wrap: anywhere;
+        font-size: 1.16rem;
+        font-weight: 700;
+      }
+
+      .checks {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .check {
+        padding: 11px 12px;
+        border-radius: 7px;
+        background: #f1f5f7;
+        line-height: 1.45;
+      }
+
+      .check strong { display: block; }
+      .pass { color: #17653a; }
+      .fail { color: #9a3030; }
+
+      .diagram {
+        overflow: hidden;
+        padding: 14px 16px 8px;
+      }
+
+      .diagram h2 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .diagram svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 125px;
+      }
+
+      .beam-svg { min-height: 120px !important; }
+
+      .disclaimer {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: #536575;
+        font-size: .8rem;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 850px) {
+        main { grid-template-columns: 1fr; }
+        .inputs { order: 0; }
+        .results { order: 1; }
+      }
+
+      @media (max-width: 540px) {
+        header { padding: 22px 18px; }
+        header h1 { font-size: 1.5rem; }
+        main { width: min(100% - 20px, 1180px); margin-top: 12px; }
+        .inputs, .summary { padding: 15px; }
+        .load-row {
+          grid-template-columns: minmax(83px, .9fr) minmax(86px, 1fr) minmax(66px, .75fr) minmax(66px, .75fr) 30px;
+          gap: 4px;
+        }
+        .metric-grid { grid-template-columns: 1fr 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Beam Designer</h1>
+      <p>Explore reactions, shear, moment, and elastic deflection for a simply supported steel beam.</p>
+    </header>
+
+    <main>
+      <section class="card inputs" aria-labelledby="input-heading">
+        <h2 id="input-heading">Beam and material inputs</h2>
+        <form id="beam-form" novalidate>
+          <div class="field-grid">
+            <div class="field">
+              <label for="span">Span (ft)</label>
+              <input id="span" type="number" min="0.001" step="any" value="20" required>
+            </div>
+            <div class="field">
+              <label for="section-name">Section label</label>
+              <input id="section-name" type="text" value="W12x26" maxlength="40">
+            </div>
+            <div class="field">
+              <label for="modulus">E (ksi)</label>
+              <input id="modulus" type="number" min="0.001" step="any" value="29000" required>
+            </div>
+            <div class="field">
+              <label for="inertia">Ix (in^4)</label>
+              <input id="inertia" type="number" min="0.001" step="any" value="204" required>
+            </div>
+            <div class="field">
+              <label for="section-modulus">Sx (in^3)</label>
+              <input id="section-modulus" type="number" min="0.001" step="any" value="33.4" required>
+            </div>
+            <div class="field">
+              <label for="allowable-stress">Fb allowable (ksi)</label>
+              <input id="allowable-stress" type="number" min="0.001" step="any" value="24" required>
+            </div>
+          </div>
+
+          <h3>Loads</h3>
+          <div id="load-list" class="load-list" aria-label="Beam loads"></div>
+          <div class="load-actions">
+            <button id="add-point" type="button">Add point load</button>
+            <button id="add-uniform" type="button">Add uniform load</button>
+          </div>
+          <p class="hint">Load magnitudes are positive downward. Point-load locations and uniform-load start/end positions are measured from the left support.</p>
+          <button class="primary" type="submit">Calculate beam response</button>
+          <p id="error-message" class="error" role="alert" hidden></p>
+        </form>
+      </section>
+
+      <section id="results" class="results" aria-live="polite" hidden>
+        <p class="example-note">The opening W12x26 example uses illustrative properties (E = 29,000 ksi, Ix = 204 in^4, Sx = 33.4 in^3, Fb = 24 ksi). Verify your own section properties and allowable stress before relying on any result.</p>
+        <section class="card summary" aria-labelledby="summary-heading">
+          <h2 id="summary-heading">Calculated response</h2>
+          <div class="metric-grid">
+            <div class="metric"><span class="metric-label">Left reaction</span><strong id="reaction-a" class="metric-value"></strong></div>
+            <div class="metric"><span class="metric-label">Right reaction</span><strong id="reaction-b" class="metric-value"></strong></div>
+            <div class="metric"><span class="metric-label">Maximum |shear|</span><strong id="max-shear" class="metric-value"></strong></div>
+            <div class="metric"><span class="metric-label">Maximum |moment|</span><strong id="max-moment" class="metric-value"></strong></div>
+            <div class="metric"><span class="metric-label">Maximum |deflection|</span><strong id="max-deflection" class="metric-value"></strong></div>
+            <div class="metric"><span class="metric-label">Maximum bending stress</span><strong id="max-stress" class="metric-value"></strong></div>
+          </div>
+          <div class="checks">
+            <div id="bending-check" class="check"></div>
+            <div id="deflection-check" class="check"></div>
+          </div>
+        </section>
+
+        <section class="card diagram" aria-labelledby="beam-diagram-heading">
+          <h2 id="beam-diagram-heading">Beam and loads</h2>
+          <div id="beam-diagram"></div>
+        </section>
+        <section class="card diagram" aria-labelledby="shear-heading">
+          <h2 id="shear-heading">Shear diagram (kip)</h2>
+          <div id="shear-diagram"></div>
+        </section>
+        <section class="card diagram" aria-labelledby="moment-heading">
+          <h2 id="moment-heading">Moment diagram (kip-ft)</h2>
+          <div id="moment-diagram"></div>
+        </section>
+        <section class="card diagram" aria-labelledby="deflection-heading">
+          <h2 id="deflection-heading">Deflection diagram (in, downward positive)</h2>
+          <div id="deflection-diagram"></div>
+        </section>
+      </section>
+
+      <p class="disclaimer">Educational tool only. This simplified analysis is not a code-compliant design and is not a substitute for review by a qualified professional. Shear strength, stability, connection design, and code-specific load combinations are not checked.</p>
+    </main>
+
+    <script>
+      "use strict";
+
+      function calculateBeam(input) {
+        const positive = (value, label) => {
+          if (!Number.isFinite(value) || value <= 0) {
+            throw new Error(label + " must be a positive number.");
+          }
+          return value;
+        };
+
+        const spanIn = positive(input.spanFt, "Span") * 12;
+        const modulusKsi = positive(input.modulusKsi, "E");
+        const inertiaIn4 = positive(input.inertiaIn4, "Ix");
+        const sectionModulusIn3 = positive(input.sectionModulusIn3, "Sx");
+        const allowableStressKsi = positive(input.allowableStressKsi, "Fb allowable");
+        if (!Array.isArray(input.loads) || input.loads.length === 0) {
+          throw new Error("Add at least one load.");
+        }
+
+        const loads = input.loads.map((load, index) => {
+          const label = "Load " + (index + 1);
+          if (load.type === "point") {
+            const magnitude = positive(load.magnitude, label + " magnitude");
+            if (!Number.isFinite(load.startFt) || load.startFt <= 0 || load.startFt >= input.spanFt) {
+              throw new Error(label + " location must be inside the span.");
+            }
+            return { type: "point", magnitude, startIn: load.startFt * 12 };
+          }
+          if (load.type === "uniform") {
+            const magnitude = positive(load.magnitude, label + " magnitude");
+            if (!Number.isFinite(load.startFt) || !Number.isFinite(load.endFt) ||
+                load.startFt < 0 || load.endFt > input.spanFt || load.startFt >= load.endFt) {
+              throw new Error(label + " must have 0 <= start < end <= span.");
+            }
+            return {
+              type: "uniform",
+              magnitude: magnitude / 12,
+              startIn: load.startFt * 12,
+              endIn: load.endFt * 12
+            };
+          }
+          throw new Error(label + " has an unsupported load type.");
+        });
+
+        let totalLoadKip = 0;
+        let momentAboutLeftKipIn = 0;
+        for (const load of loads) {
+          if (load.type === "point") {
+            totalLoadKip += load.magnitude;
+            momentAboutLeftKipIn += load.magnitude * load.startIn;
+          } else {
+            const resultant = load.magnitude * (load.endIn - load.startIn);
+            totalLoadKip += resultant;
+            momentAboutLeftKipIn += resultant * (load.startIn + load.endIn) / 2;
+          }
+        }
+
+        const reactionB = momentAboutLeftKipIn / spanIn;
+        const reactionA = totalLoadKip - reactionB;
+        const stations = Array.from(new Set([
+          0,
+          spanIn,
+          ...loads.flatMap(load => load.type === "point"
+            ? [load.startIn]
+            : [load.startIn, load.endIn])
+        ])).sort((a, b) => a - b);
+
+        function shearAt(x, side) {
+          let shear = reactionA;
+          for (const load of loads) {
+            if (load.type === "point") {
+              if (load.startIn < x || (load.startIn === x && side === "right")) {
+                shear -= load.magnitude;
+              }
+            } else {
+              const loadedLength = Math.max(0, Math.min(x, load.endIn) - load.startIn);
+              shear -= load.magnitude * loadedLength;
+            }
+          }
+          return shear;
+        }
+
+        function momentAt(x) {
+          let moment = reactionA * x;
+          for (const load of loads) {
+            if (load.type === "point") {
+              moment -= load.magnitude * Math.max(0, x - load.startIn);
+            } else {
+              const fromStart = Math.max(0, x - load.startIn);
+              const fromEnd = Math.max(0, x - load.endIn);
+              moment -= load.magnitude * (fromStart * fromStart - fromEnd * fromEnd) / 2;
+            }
+          }
+          return moment;
+        }
+
+        function integratedMoment(x) {
+          let value = reactionA * x * x / 2;
+          for (const load of loads) {
+            if (load.type === "point") {
+              const distance = Math.max(0, x - load.startIn);
+              value -= load.magnitude * distance * distance / 2;
+            } else {
+              const fromStart = Math.max(0, x - load.startIn);
+              const fromEnd = Math.max(0, x - load.endIn);
+              value -= load.magnitude * (fromStart ** 3 - fromEnd ** 3) / 6;
+            }
+          }
+          return value;
+        }
+
+        function doubleIntegratedMoment(x) {
+          let value = reactionA * x ** 3 / 6;
+          for (const load of loads) {
+            if (load.type === "point") {
+              value -= load.magnitude * Math.max(0, x - load.startIn) ** 3 / 6;
+            } else {
+              const fromStart = Math.max(0, x - load.startIn);
+              const fromEnd = Math.max(0, x - load.endIn);
+              value -= load.magnitude * (fromStart ** 4 - fromEnd ** 4) / 24;
+            }
+          }
+          return value;
+        }
+
+        const flexuralRigidity = modulusKsi * inertiaIn4;
+        const endIntegral = doubleIntegratedMoment(spanIn);
+        function deflectionAt(x) {
+          return (endIntegral * x / spanIn - doubleIntegratedMoment(x)) / flexuralRigidity;
+        }
+
+        const momentCandidates = [...stations];
+        let maximumShearKip = Math.max(Math.abs(reactionA), Math.abs(reactionB));
+        for (const station of stations) {
+          if (station > 0) {
+            maximumShearKip = Math.max(maximumShearKip, Math.abs(shearAt(station, "left")));
+          }
+          if (station < spanIn) {
+            maximumShearKip = Math.max(maximumShearKip, Math.abs(shearAt(station, "right")));
+          }
+        }
+        for (let index = 0; index < stations.length - 1; index += 1) {
+          const start = stations[index];
+          const end = stations[index + 1];
+          const startShear = shearAt(start, "right");
+          const endShear = shearAt(end, "left");
+          if (startShear * endShear < 0) {
+            const zeroShear = start + (end - start) * startShear / (startShear - endShear);
+            momentCandidates.push(zeroShear);
+          }
+        }
+
+        let maxMomentKipIn = 0;
+        let maxMomentAtIn = 0;
+        for (const x of momentCandidates) {
+          const value = Math.abs(momentAt(x));
+          if (value > maxMomentKipIn) {
+            maxMomentKipIn = value;
+            maxMomentAtIn = x;
+          }
+        }
+
+        function maximumAbsolute(fn, end, samples) {
+          let bestX = 0;
+          let bestValue = Math.abs(fn(0));
+          let previous = Math.abs(fn(0));
+          let current = previous;
+          let next;
+          const step = end / samples;
+          const values = Array.from({ length: samples + 1 }, (_, index) => Math.abs(fn(index * step)));
+          bestValue = values[0];
+          for (let index = 1; index < samples; index += 1) {
+            if (values[index] >= values[index - 1] && values[index] >= values[index + 1]) {
+              let left = (index - 1) * step;
+              let right = (index + 1) * step;
+              const ratio = (Math.sqrt(5) - 1) / 2;
+              let x1 = right - ratio * (right - left);
+              let x2 = left + ratio * (right - left);
+              let f1 = Math.abs(fn(x1));
+              let f2 = Math.abs(fn(x2));
+              for (let iteration = 0; iteration < 55; iteration += 1) {
+                if (f1 < f2) {
+                  left = x1;
+                  x1 = x2;
+                  f1 = f2;
+                  x2 = left + ratio * (right - left);
+                  f2 = Math.abs(fn(x2));
+                } else {
+                  right = x2;
+                  x2 = x1;
+                  f2 = f1;
+                  x1 = right - ratio * (right - left);
+                  f1 = Math.abs(fn(x1));
+                }
+              }
+              const candidateX = (left + right) / 2;
+              const candidateValue = Math.abs(fn(candidateX));
+              if (candidateValue > bestValue) {
+                bestValue = candidateValue;
+                bestX = candidateX;
+              }
+            }
+          }
+          for (const index of [0, samples]) {
+            if (values[index] > bestValue) {
+              bestValue = values[index];
+              bestX = index * step;
+            }
+          }
+          return { value: bestValue, x: bestX };
+        }
+
+        const maximumDeflection = maximumAbsolute(deflectionAt, spanIn, 800);
+        const maximumBendingStressKsi = maxMomentKipIn / sectionModulusIn3;
+
+        function sampleCurve(fn, steps, includeShearJumps) {
+          const xs = new Set(Array.from({ length: steps + 1 }, (_, index) => spanIn * index / steps));
+          for (const station of stations) xs.add(station);
+          const ordered = Array.from(xs).sort((a, b) => a - b);
+          const points = [];
+          for (const x of ordered) {
+            const hasPointLoad = loads.some(load => load.type === "point" && load.startIn === x);
+            if (includeShearJumps && hasPointLoad) {
+              points.push({ xFt: x / 12, value: fn(x, "left") });
+              points.push({ xFt: x / 12, value: fn(x, "right") });
+            } else {
+              points.push({ xFt: x / 12, value: fn(x, x === spanIn ? "left" : "right") });
+            }
+          }
+          if (includeShearJumps) points.push({ xFt: input.spanFt, value: 0 });
+          return points;
+        }
+
+        return {
+          spanFt: input.spanFt,
+          reactionA,
+          reactionB,
+          maximumShearKip,
+          maxMomentKipIn,
+          maxMomentAtFt: maxMomentAtIn / 12,
+          maximumDeflectionIn: maximumDeflection.value,
+          maxDeflectionAtFt: maximumDeflection.x / 12,
+          maximumBendingStressKsi,
+          allowableStressKsi,
+          deflectionLimitIn: spanIn / 360,
+          bendingPasses: maximumBendingStressKsi <= allowableStressKsi,
+          deflectionPasses: maximumDeflection.value <= spanIn / 360,
+          sectionName: input.sectionName,
+          loads,
+          curves: {
+            shear: sampleCurve(shearAt, 320, true),
+            moment: sampleCurve(x => momentAt(x), 320, false)
+              .map(point => ({ xFt: point.xFt, value: point.value / 12 })),
+            deflection: sampleCurve(x => deflectionAt(x), 320, false)
+          }
+        };
+      }
+
+      if (typeof window !== "undefined") window.calculateBeam = calculateBeam;
+
+      function createLoadRow(type, magnitude, start, end) {
+        const row = document.createElement("div");
+        row.className = "load-row";
+
+        const typeField = document.createElement("div");
+        typeField.className = "field";
+        const typeLabel = document.createElement("label");
+        typeLabel.textContent = "Type";
+        const typeSelect = document.createElement("select");
+        typeSelect.dataset.role = "type";
+        typeSelect.setAttribute("aria-label", "Load type");
+        for (const option of [
+          { value: "point", text: "Point" },
+          { value: "uniform", text: "Uniform" }
+        ]) {
+          const element = document.createElement("option");
+          element.value = option.value;
+          element.textContent = option.text;
+          typeSelect.appendChild(element);
+        }
+        typeSelect.value = type;
+        typeLabel.appendChild(typeSelect);
+        typeField.appendChild(typeLabel);
+
+        const magnitudeField = document.createElement("div");
+        magnitudeField.className = "field";
+        const magnitudeLabel = document.createElement("label");
+        const magnitudeCaption = document.createElement("span");
+        magnitudeCaption.textContent = "Load (kip)";
+        const magnitudeInput = document.createElement("input");
+        magnitudeInput.type = "number";
+        magnitudeInput.min = "0.000001";
+        magnitudeInput.step = "any";
+        magnitudeInput.required = true;
+        magnitudeInput.dataset.role = "magnitude";
+        magnitudeInput.value = magnitude;
+        magnitudeInput.setAttribute("aria-label", "Load magnitude");
+        magnitudeLabel.append(magnitudeCaption, magnitudeInput);
+        magnitudeField.appendChild(magnitudeLabel);
+
+        const startField = document.createElement("div");
+        startField.className = "field";
+        const startLabel = document.createElement("label");
+        const startCaption = document.createElement("span");
+        const startInput = document.createElement("input");
+        startInput.type = "number";
+        startInput.min = "0";
+        startInput.step = "any";
+        startInput.required = true;
+        startInput.dataset.role = "start";
+        startInput.value = start;
+        startLabel.append(startCaption, startInput);
+        startField.appendChild(startLabel);
+
+        const endField = document.createElement("div");
+        endField.className = "field";
+        const endLabel = document.createElement("label");
+        const endCaption = document.createElement("span");
+        const endInput = document.createElement("input");
+        endInput.type = "number";
+        endInput.min = "0";
+        endInput.step = "any";
+        endInput.required = true;
+        endInput.dataset.role = "end";
+        endInput.value = end;
+        endLabel.append(endCaption, endInput);
+        endField.appendChild(endLabel);
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "remove-load";
+        removeButton.textContent = "×";
+        removeButton.setAttribute("aria-label", "Remove load");
+        removeButton.addEventListener("click", () => row.remove());
+        row.append(typeField, magnitudeField, startField, endField, removeButton);
+
+        function updateLabels() {
+          const isPoint = typeSelect.value === "point";
+          magnitudeCaption.textContent = isPoint ? "Load (kip)" : "Load (kip/ft)";
+          startCaption.textContent = isPoint ? "At (ft)" : "Start (ft)";
+          endCaption.textContent = "End (ft)";
+          endInput.disabled = isPoint;
+          endInput.required = !isPoint;
+          if (isPoint) endInput.value = "";
+        }
+
+        typeSelect.addEventListener("change", updateLabels);
+        updateLabels();
+        return row;
+      }
+
+      function readForm() {
+        const loads = Array.from(document.querySelectorAll(".load-row")).map((row, index) => {
+          const type = row.querySelector('[data-role="type"]').value;
+          const magnitude = Number(row.querySelector('[data-role="magnitude"]').value);
+          const startFt = Number(row.querySelector('[data-role="start"]').value);
+          const endInput = row.querySelector('[data-role="end"]');
+          const load = { type, magnitude, startFt };
+          if (type === "uniform") load.endFt = Number(endInput.value);
+          if (!Number.isFinite(startFt) || !Number.isFinite(magnitude)) {
+            throw new Error("Enter valid numeric values for load " + (index + 1) + ".");
+          }
+          return load;
+        });
+
+        return {
+          spanFt: Number(document.getElementById("span").value),
+          sectionName: document.getElementById("section-name").value.trim() || "Steel beam",
+          modulusKsi: Number(document.getElementById("modulus").value),
+          inertiaIn4: Number(document.getElementById("inertia").value),
+          sectionModulusIn3: Number(document.getElementById("section-modulus").value),
+          allowableStressKsi: Number(document.getElementById("allowable-stress").value),
+          loads
+        };
+      }
+
+      function formatNumber(value, decimals) {
+        return value.toLocaleString("en-US", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        });
+      }
+
+      function escapeHtml(value) {
+        return value.replace(/[&<>"']/g, character => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[character]);
+      }
+
+      function chartSvg(points, unit, label) {
+        const width = 720;
+        const height = 180;
+        const left = 54;
+        const right = 690;
+        const top = 18;
+        const bottom = 143;
+        const values = points.map(point => point.value);
+        const rawMin = Math.min(0, ...values);
+        const rawMax = Math.max(0, ...values);
+        const range = rawMax - rawMin || 1;
+        const min = rawMin - range * 0.1;
+        const max = rawMax + range * 0.1;
+        const xMax = points[points.length - 1].xFt || 1;
+        const xAt = x => left + x / xMax * (right - left);
+        const yAt = y => bottom - (y - min) / (max - min) * (bottom - top);
+        const path = points.map((point, index) =>
+          (index === 0 ? "M" : "L") + xAt(point.xFt).toFixed(2) + " " + yAt(point.value).toFixed(2)
+        ).join(" ");
+        const zeroY = yAt(0);
+        return '<svg viewBox="0 0 ' + width + " " + height + '" role="img" aria-label="' + label + '">' +
+          '<line x1="' + left + '" y1="' + zeroY + '" x2="' + right + '" y2="' + zeroY + '" stroke="#8c9aa6" stroke-width="1"/>' +
+          '<line x1="' + left + '" y1="' + top + '" x2="' + left + '" y2="' + bottom + '" stroke="#c4cdd5" stroke-width="1"/>' +
+          '<path d="' + path + '" fill="none" stroke="#176c9c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+          '<text x="5" y="' + (top + 4) + '" fill="#536575" font-size="12">' + formatNumber(rawMax, 2) + " " + unit + "</text>" +
+          '<text x="5" y="' + (bottom + 4) + '" fill="#536575" font-size="12">' + formatNumber(rawMin, 2) + " " + unit + "</text>" +
+          '<text x="' + left + '" y="166" fill="#536575" font-size="12">0 ft</text>' +
+          '<text x="' + right + '" y="166" fill="#536575" font-size="12" text-anchor="end">' + formatNumber(xMax, 2) + " ft</text>" +
+          "</svg>";
+      }
+
+      function beamSvg(result) {
+        const left = 42;
+        const right = 678;
+        const beamY = 76;
+        const mapX = ft => left + ft / result.spanFt * (right - left);
+        let loadDrawing = "";
+        const arrowCountFor = (load, extent) => Math.max(3, Math.min(12, Math.round(extent / result.spanFt * 16)));
+
+        for (const load of result.loads) {
+          if (load.type === "point") {
+            const x = mapX(load.startIn / 12);
+            loadDrawing += '<line x1="' + x + '" y1="25" x2="' + x + '" y2="' + (beamY - 5) + '" stroke="#a34832" stroke-width="2" marker-end="url(#load-arrow)"/>' +
+              '<text x="' + x + '" y="18" text-anchor="middle" fill="#793723" font-size="12">' + formatNumber(load.magnitude, 2) + " kip</text>";
+          } else {
+            const startFt = load.startIn / 12;
+            const endFt = load.endIn / 12;
+            const x1 = mapX(startFt);
+            const x2 = mapX(endFt);
+            const count = arrowCountFor(load, endFt - startFt);
+            loadDrawing += '<line x1="' + x1 + '" y1="31" x2="' + x2 + '" y2="31" stroke="#a34832" stroke-width="1.5"/>' +
+              '<text x="' + ((x1 + x2) / 2) + '" y="18" text-anchor="middle" fill="#793723" font-size="12">' + formatNumber(load.magnitude * 12, 2) + " kip/ft</text>";
+            for (let index = 0; index <= count; index += 1) {
+              const x = x1 + (x2 - x1) * index / count;
+              loadDrawing += '<line x1="' + x + '" y1="32" x2="' + x + '" y2="' + (beamY - 5) + '" stroke="#a34832" stroke-width="1.3" marker-end="url(#load-arrow)"/>';
+            }
+          }
+        }
+
+        return '<svg class="beam-svg" viewBox="0 0 720 125" role="img" aria-label="Simply supported beam with entered loads">' +
+          '<defs><marker id="load-arrow" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 z" fill="#a34832"/></marker></defs>' +
+          loadDrawing +
+          '<line x1="' + left + '" y1="' + beamY + '" x2="' + right + '" y2="' + beamY + '" stroke="#173d5c" stroke-width="8"/>' +
+          '<path d="M' + (left - 13) + " 104 L" + left + " 80 L" + (left + 13) + ' 104 Z" fill="#dbe7ee" stroke="#536575" stroke-width="1.5"/>' +
+          '<path d="M' + (right - 13) + " 104 L" + right + " 80 L" + (right + 13) + ' 104 Z" fill="#dbe7ee" stroke="#536575" stroke-width="1.5"/>' +
+          '<line x1="' + (left - 20) + '" y1="105" x2="' + (left + 20) + '" y2="105" stroke="#536575"/>' +
+          '<line x1="' + (right - 20) + '" y1="105" x2="' + (right + 20) + '" y2="105" stroke="#536575"/>' +
+          '<text x="' + left + '" y="120" text-anchor="middle" fill="#536575" font-size="11">A</text>' +
+          '<text x="' + right + '" y="120" text-anchor="middle" fill="#536575" font-size="11">B</text>' +
+          '<text x="360" y="120" text-anchor="middle" fill="#536575" font-size="11">L = ' + formatNumber(result.spanFt, 2) + " ft · " + escapeHtml(result.sectionName) + "</text>" +
+          "</svg>";
+      }
+
+      function displayResults(result) {
+        document.getElementById("reaction-a").textContent = formatNumber(result.reactionA, 2) + " kip";
+        document.getElementById("reaction-b").textContent = formatNumber(result.reactionB, 2) + " kip";
+        document.getElementById("max-shear").textContent = formatNumber(result.maximumShearKip, 2) + " kip";
+        document.getElementById("max-moment").textContent = formatNumber(result.maxMomentKipIn / 12, 2) + " kip-ft";
+        document.getElementById("max-deflection").textContent =
+          formatNumber(result.maximumDeflectionIn, 3) + " in at " + formatNumber(result.maxDeflectionAtFt, 2) + " ft";
+        document.getElementById("max-stress").textContent = formatNumber(result.maximumBendingStressKsi, 2) + " ksi";
+
+        const bending = document.getElementById("bending-check");
+        bending.className = "check " + (result.bendingPasses ? "pass" : "fail");
+        bending.innerHTML = "<strong>Bending: " + (result.bendingPasses ? "PASS" : "FAIL") + "</strong>" +
+          formatNumber(result.maximumBendingStressKsi, 2) + " ksi / " +
+          formatNumber(result.allowableStressKsi, 2) + " ksi allowable";
+
+        const deflection = document.getElementById("deflection-check");
+        deflection.className = "check " + (result.deflectionPasses ? "pass" : "fail");
+        deflection.innerHTML = "<strong>Deflection: " + (result.deflectionPasses ? "PASS" : "FAIL") + "</strong>" +
+          formatNumber(result.maximumDeflectionIn, 3) + " in / " +
+          formatNumber(result.deflectionLimitIn, 3) + " in limit (L/360)";
+
+        document.getElementById("beam-diagram").innerHTML = beamSvg(result);
+        document.getElementById("shear-diagram").innerHTML =
+          chartSvg(result.curves.shear, "kip", "Shear diagram in kip over the span");
+        document.getElementById("moment-diagram").innerHTML =
+          chartSvg(result.curves.moment, "kip-ft", "Moment diagram in kip-feet over the span");
+        document.getElementById("deflection-diagram").innerHTML =
+          chartSvg(result.curves.deflection, "in", "Deflection diagram in inches over the span");
+      }
+
+      function initialize() {
+        const loadList = document.getElementById("load-list");
+        const form = document.getElementById("beam-form");
+        const results = document.getElementById("results");
+        const errorMessage = document.getElementById("error-message");
+
+        loadList.appendChild(createLoadRow("uniform", "1", "0", "20"));
+        document.getElementById("add-point").addEventListener("click", () => {
+          const span = Number(document.getElementById("span").value) || 20;
+          loadList.appendChild(createLoadRow("point", "1", formatNumber(span / 2, 2), ""));
+        });
+        document.getElementById("add-uniform").addEventListener("click", () => {
+          const span = Number(document.getElementById("span").value) || 20;
+          loadList.appendChild(createLoadRow("uniform", "1", "0", formatNumber(span, 2)));
+        });
+        form.addEventListener("submit", event => {
+          event.preventDefault();
+          errorMessage.hidden = true;
+          results.hidden = true;
+          try {
+            const result = calculateBeam(readForm());
+            displayResults(result);
+            results.hidden = false;
+          } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.hidden = false;
+          }
+        });
+        form.requestSubmit();
+      }
+
+      if (typeof document !== "undefined") {
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initialize);
+        } else {
+          initialize();
+        }
+      }
+    </script>
+  </body>
+</html>

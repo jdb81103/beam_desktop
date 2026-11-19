@@ -547,9 +547,6 @@
         function maximumAbsolute(fn, end, samples) {
           let bestX = 0;
           let bestValue = Math.abs(fn(0));
-          let previous = Math.abs(fn(0));
-          let current = previous;
-          let next;
           const step = end / samples;
           const values = Array.from({ length: samples + 1 }, (_, index) => Math.abs(fn(index * step)));
           bestValue = values[0];
@@ -812,7 +809,7 @@
         const beamY = 76;
         const mapX = ft => left + ft / result.spanFt * (right - left);
         let loadDrawing = "";
-        const arrowCountFor = (load, extent) => Math.max(3, Math.min(12, Math.round(extent / result.spanFt * 16)));
+        const arrowCountFor = extent => Math.max(3, Math.min(12, Math.round(extent / result.spanFt * 16)));
 
         for (const load of result.loads) {
           if (load.type === "point") {
@@ -824,7 +821,7 @@
             const endFt = load.endIn / 12;
             const x1 = mapX(startFt);
             const x2 = mapX(endFt);
-            const count = arrowCountFor(load, endFt - startFt);
+            const count = arrowCountFor(endFt - startFt);
             loadDrawing += '<line x1="' + x1 + '" y1="31" x2="' + x2 + '" y2="31" stroke="#a34832" stroke-width="1.5"/>' +
               '<text x="' + ((x1 + x2) / 2) + '" y="18" text-anchor="middle" fill="#793723" font-size="12">' + formatNumber(load.magnitude * 12, 2) + " kip/ft</text>";
             for (let index = 0; index <= count; index += 1) {

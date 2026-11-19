@@ -11,3 +11,4 @@
 - Asked to auto-commit the pending changes. Committed the tracked app cleanup and prompt log update. Worked: yes.
 - Asked to make the GitHub repository public. After confirming the existing commit email would be exposed, changed the repository visibility to public and verified the setting. Worked: yes.
 - Asked to fix the broken GitHub Pages 404. Enabled Pages in workflow-build mode and added a main-branch Pages deployment workflow. Verified deployment succeeded and the site returned HTTP 200. Worked: yes.
+- Asked to provide the website link and index.html link. Supplied the public GitHub Pages URL and the workspace index file reference. Worked: yes.
